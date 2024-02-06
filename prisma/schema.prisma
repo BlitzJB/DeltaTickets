@@ -10,15 +10,39 @@ datasource db {
     provider = "mysql"
     url      = env("DATABASE_URL")
 
-    // Do not use foreign keys (PlanetScale does not support them)
     relationMode = "prisma"
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
+model User {
+    id       String  @id @default(uuid())
+    email    String  @unique
+    name     String?
+    password String
+
+    sessions Session[]
+    tickets  Ticket[]
+}
+
+model Session {
+    id        String   @id @default(uuid())
+    token     String   @unique @default(uuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id])
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    @@index([name])
+    @@index([userId])
+}
+
+model Ticket {
+    id            String   @id @default(uuid())
+    name          String
+    price         Float
+    paymentStatus String
+    userId        String
+    user          User     @relation(fields: [userId], references: [id])
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    @@index([userId])
 }
